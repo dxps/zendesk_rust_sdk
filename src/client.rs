@@ -4,7 +4,11 @@ use base64::{engine::general_purpose, Engine};
 use reqwest::Method;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use crate::{group::ListGroupsDTO, organization::ListOrganizationsDTO};
+use crate::{
+    group::ListGroupsDTO,
+    organization::ListOrganizationsDTO,
+    ticket::{GetTicketsCountResp, GetTicketsDTO},
+};
 
 /// Zendesk v2 APIs [requests authentication options](https://support.zendesk.com/hc/en-us/articles/4408831452954-How-can-I-authenticate-API-requests-).
 pub enum AuthCredential {
@@ -36,11 +40,7 @@ impl Client {
         }
     }
 
-    pub(crate) async fn do_request<T>(
-        &self,
-        method: Method,
-        resource: String,
-    ) -> Result<T, std::io::Error>
+    pub(crate) async fn do_request<T>(&self, method: Method, resource: String) -> Result<T, std::io::Error>
     where
         T: DeserializeOwned,
     {
@@ -63,7 +63,6 @@ impl Client {
                         Err(io::Error::new(io::ErrorKind::Other, err))
                     }
                 }
-                // response.json::<T>().await
             }
             Err(err) => {
                 log::error!("[do_request] Failed with '{err}'.");
@@ -79,6 +78,16 @@ impl Client {
 
     pub async fn list_organizations(&self) -> Result<ListOrganizationsDTO, io::Error> {
         self.do_request::<ListOrganizationsDTO>(reqwest::Method::GET, format!("organizations"))
+            .await
+    }
+
+    pub async fn get_tickets(&self) -> Result<GetTicketsDTO, io::Error> {
+        self.do_request::<GetTicketsDTO>(reqwest::Method::GET, format!("tickets"))
+            .await
+    }
+
+    pub async fn get_tickets_count(&self) -> Result<GetTicketsCountResp, io::Error> {
+        self.do_request::<GetTicketsCountResp>(reqwest::Method::GET, format!("tickets/count"))
             .await
     }
 }
