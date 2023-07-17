@@ -14,36 +14,44 @@ async fn main() {
         std::env::set_var(
             "RUST_LOG",
             format!(
-                "{},hyper=info,mio=info,sqlx=warn,tower_http=warn",
+                "{},hyper=info,mio=info,reqwest=warn,sqlx=warn,tower_http=warn",
                 cli_flags.log_level
             ),
         )
     }
+    tracing_subscriber::fmt::init();
+
+    println!("RUST_LOG={}", std::env::var("RUST_LOG").unwrap());
 
     let base_url = std::env::var("ZENDESK_URL").expect("ZENDESK_URL env var is not defined");
     let email = std::env::var("ZENDESK_EMAIL").expect("ZENDESK_EMAIL env var is not defined");
     let api_token =
         std::env::var("ZENDESK_API_TOKEN").expect("ZENDESK_API_TOKEN env var is not defined");
 
+    // Initing the client.
     let zc = Client::new(base_url, ApiTokenCredential { email, api_token });
 
-    // Initing the client.
-    let result = zc.list_groups().await;
-
     // Using the client.
-    println!("\n___________________________");
+    let result = zc.list_organizations().await;
+    log::debug!("\n___________________________");
     if let Ok(dto) = result {
-        println!("Got {} groups:", dto.groups.len());
-        for item in dto.groups {
+        println!("Got {} organizations:", dto.organizations.len());
+        for item in dto.organizations {
             println!(" {:?}", item)
         }
     } else {
-        eprintln!("Failed to list the groups: {}", result.err().unwrap())
+        eprintln!(
+            "Failed to list the organizations: {}",
+            result.err().unwrap()
+        )
     }
 }
 
 #[derive(Parser, Debug)]
-#[clap(name = "List Groups", about = "Example of listing the groups.")]
+#[clap(
+    name = "List Organizations",
+    about = "Example of listing the organizations."
+)]
 struct CliFlags {
     /// The logging level.
     #[clap(short = 'l', long = "log", default_value = "info")]

@@ -4,7 +4,7 @@ use base64::{engine::general_purpose, Engine};
 use reqwest::Method;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use crate::group::ListGroupsDTO;
+use crate::{group::ListGroupsDTO, organization::ListOrganizationsDTO};
 
 /// Zendesk v2 APIs [requests authentication options](https://support.zendesk.com/hc/en-us/articles/4408831452954-How-can-I-authenticate-API-requests-).
 pub enum AuthCredential {
@@ -55,10 +55,13 @@ impl Client {
         match request.send().await {
             Ok(resp) => {
                 let resp_body = resp.text().await.unwrap();
-                log::debug!("[do_request] Got response {:?}", resp_body);
+                log::trace!("[do_request] Got response {:?}", resp_body);
                 match serde_json::from_str::<T>(&resp_body) {
                     Ok(resp_json) => Ok(resp_json),
-                    Err(err) => Err(io::Error::new(io::ErrorKind::Other, err)),
+                    Err(err) => {
+                        log::debug!("Got a deserialization error for this string: {resp_body}");
+                        Err(io::Error::new(io::ErrorKind::Other, err))
+                    }
                 }
                 // response.json::<T>().await
             }
@@ -71,6 +74,11 @@ impl Client {
 
     pub async fn list_groups(&self) -> Result<ListGroupsDTO, io::Error> {
         self.do_request::<ListGroupsDTO>(reqwest::Method::GET, format!("groups"))
+            .await
+    }
+
+    pub async fn list_organizations(&self) -> Result<ListOrganizationsDTO, io::Error> {
+        self.do_request::<ListOrganizationsDTO>(reqwest::Method::GET, format!("organizations"))
             .await
     }
 }
