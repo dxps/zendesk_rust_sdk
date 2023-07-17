@@ -4,7 +4,7 @@ use base64::{engine::general_purpose, Engine};
 use reqwest::Method;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-use crate::group::GroupResponse;
+use crate::group::ListGroupsDTO;
 
 /// Zendesk v2 APIs [requests authentication options](https://support.zendesk.com/hc/en-us/articles/4408831452954-How-can-I-authenticate-API-requests-).
 pub enum AuthCredential {
@@ -69,8 +69,8 @@ impl Client {
         }
     }
 
-    pub async fn list_groups(&self) -> Result<GroupResponse, io::Error> {
-        self.do_request::<GroupResponse>(reqwest::Method::GET, format!("groups"))
+    pub async fn list_groups(&self) -> Result<ListGroupsDTO, io::Error> {
+        self.do_request::<ListGroupsDTO>(reqwest::Method::GET, format!("groups"))
             .await
     }
 }

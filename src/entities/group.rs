@@ -13,6 +13,6 @@ pub struct Group {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct GroupResponse {
+pub struct ListGroupsDTO {
     pub groups: Vec<Group>,
 }

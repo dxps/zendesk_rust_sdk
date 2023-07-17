@@ -25,8 +25,16 @@ async fn main() {
 
     let zc = Client::new(base_url, ApiTokenCredential { email, api_token });
 
-    let groups = zc.list_groups().await;
-    println!("{:?}", groups);
+    let result = zc.list_groups().await;
+    println!("\n___________________________");
+    if let Ok(group_res) = result {
+        println!("Got {} groups:", group_res.groups.len());
+        for group in group_res.groups {
+            println!(" {:?}", group)
+        }
+    } else {
+        eprintln!("Failed to list the groups: {}", result.err().unwrap())
+    }
 }
 
 #[derive(Parser, Debug)]
