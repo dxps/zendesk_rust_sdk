@@ -10,12 +10,20 @@ license = "GPL 3"
 keywords = [ "zendesk", "zendesk api" ]
 
 [[bin]]
-name = "ex_list_groups"
-path = "src/bin/ex_list_groups.rs"
+name = "ex_get_groups"
+path = "src/bin/ex_get_groups.rs"
 
 [[bin]]
-name = "ex_list_organizations"
-path = "src/bin/ex_list_organizations.rs"
+name = "ex_get_organizations"
+path = "src/bin/ex_get_organizations.rs"
+
+[[bin]]
+name = "ex_get_tickets"
+path = "src/bin/ex_get_tickets.rs"
+
+[[bin]]
+name = "ex_get_tickets_count"
+path = "src/bin/ex_get_tickets_count.rs"
 
 [dependencies]
 base64 = "0.21.2"

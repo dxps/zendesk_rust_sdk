@@ -14,6 +14,6 @@ pub struct Organization {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ListOrganizationsDTO {
+pub struct ListOrganizationsResp {
     pub organizations: Vec<Organization>,
 }
