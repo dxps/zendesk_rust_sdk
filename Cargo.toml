@@ -9,10 +9,16 @@ repository = "https://github.com/dxps/zendesk_rsdk"
 license = "GPL 3"
 keywords = [ "zendesk", "zendesk api" ]
 
+[[bin]]
+name = "ex_list_groups"
+path = "src/bin/ex_list_groups.rs"
+
 [dependencies]
 base64 = "0.21.2"
 chrono = { version = "0.4.26", features = [ "serde" ] }
+clap = { version = "3.2.25", features = ["derive"] }
 dotenv = "0.15.0"
+log = "0.4.19"
 reqwest = { version = "0.11.18", features = [ "json" ] }
 serde =  { version = "1.0.171", features = [ "derive" ] }
 serde_json = "1.0.102"

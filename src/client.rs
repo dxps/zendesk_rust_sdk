@@ -50,11 +50,12 @@ impl Client {
             format!("Basic {}", self.oauth_token.as_ref().unwrap()),
         );
 
-        //request.send().await?.json::<T>().await
+        // Instead of doing `request.send().await?.json::<T>().await`, the response is explicitly
+        // fetched and converted, so that it can be investigated in case of an error.
         match request.send().await {
             Ok(resp) => {
                 let resp_body = resp.text().await.unwrap();
-                println!("[do_request] Got response {:?}", resp_body);
+                log::debug!("[do_request] Got response {:?}", resp_body);
                 match serde_json::from_str::<T>(&resp_body) {
                     Ok(resp_json) => Ok(resp_json),
                     Err(err) => Err(io::Error::new(io::ErrorKind::Other, err)),
@@ -62,7 +63,7 @@ impl Client {
                 // response.json::<T>().await
             }
             Err(err) => {
-                println!("[do_request] Failed with '{err}'.");
+                log::error!("[do_request] Failed with '{err}'.");
                 Err(io::Error::new(io::ErrorKind::Other, err))
             }
         }
