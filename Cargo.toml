@@ -9,6 +9,8 @@ repository = "https://github.com/dxps/zendesk_rsdk"
 license = "GPL 3"
 keywords = [ "zendesk", "zendesk api" ]
 
+#################################################################
+
 [[bin]]
 name = "ex_get_groups"
 path = "src/bin/ex_get_groups.rs"
@@ -25,6 +27,12 @@ path = "src/bin/ex_get_tickets.rs"
 name = "ex_get_tickets_count"
 path = "src/bin/ex_get_tickets_count.rs"
 
+[[bin]]
+name = "ex_search_tickets"
+path = "src/bin/ex_search_tickets.rs"
+
+#################################################################
+
 [dependencies]
 base64 = "0.21.2"
 chrono = { version = "0.4.26", features = [ "serde" ] }
@@ -37,3 +45,4 @@ serde_json = "1.0.102"
 tokio = { version = "1.29.1", features = [ "full" ] }
 tracing = "0.1.37"
 tracing-subscriber = "0.3.17"
+url = "2.4.0"

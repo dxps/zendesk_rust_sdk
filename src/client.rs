@@ -7,7 +7,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use crate::{
     group::ListGroupsResp,
     organization::ListOrganizationsResp,
-    ticket::{GetTicketsCountResp, GetTicketsResp},
+    ticket::{GetTicketsCountResp, GetTicketsResp, SearchTicketsResp, Ticket},
 };
 
 /// Zendesk v2 APIs [requests authentication options](https://support.zendesk.com/hc/en-us/articles/4408831452954-How-can-I-authenticate-API-requests-).
@@ -40,11 +40,26 @@ impl Client {
         }
     }
 
-    pub(crate) async fn do_request<T>(&self, method: Method, resource: String) -> Result<T, std::io::Error>
+    pub(crate) async fn do_zapi_request<T>(
+        &self,
+        method: Method,
+        resource: String,
+    ) -> Result<T, std::io::Error>
     where
         T: DeserializeOwned,
     {
         let url = format!("{}/{}", &self.base_url, resource);
+        self.do_zapi_request_to_url(method, url).await
+    }
+
+    pub(crate) async fn do_zapi_request_to_url<T>(
+        &self,
+        method: Method,
+        url: String,
+    ) -> Result<T, std::io::Error>
+    where
+        T: DeserializeOwned,
+    {
         let request = reqwest::Client::new().request(method, url).header(
             "Authorization",
             format!("Basic {}", self.oauth_token.as_ref().unwrap()),
@@ -72,22 +87,51 @@ impl Client {
     }
 
     pub async fn list_groups(&self) -> Result<ListGroupsResp, io::Error> {
-        self.do_request::<ListGroupsResp>(reqwest::Method::GET, format!("groups"))
+        //
+        self.do_zapi_request::<ListGroupsResp>(reqwest::Method::GET, format!("groups"))
             .await
     }
 
     pub async fn list_organizations(&self) -> Result<ListOrganizationsResp, io::Error> {
-        self.do_request::<ListOrganizationsResp>(reqwest::Method::GET, format!("organizations"))
+        //
+        self.do_zapi_request::<ListOrganizationsResp>(reqwest::Method::GET, format!("organizations"))
             .await
     }
 
     pub async fn get_tickets(&self) -> Result<GetTicketsResp, io::Error> {
-        self.do_request::<GetTicketsResp>(reqwest::Method::GET, format!("tickets"))
+        //
+        self.do_zapi_request::<GetTicketsResp>(reqwest::Method::GET, format!("tickets"))
             .await
     }
 
     pub async fn get_tickets_count(&self) -> Result<GetTicketsCountResp, io::Error> {
-        self.do_request::<GetTicketsCountResp>(reqwest::Method::GET, format!("tickets/count"))
+        //
+        self.do_zapi_request::<GetTicketsCountResp>(reqwest::Method::GET, format!("tickets/count"))
             .await
+    }
+
+    ///
+    /// Search tickets using your own query. Note that this will be URL encoded before being sent to Zendesk API.
+    /// References:
+    /// - [Searching by date and time](https://support.zendesk.com/hc/en-us/articles/4408886879258#topic_ghr_wsc_3v)
+    /// - [Searching with the Zendesk Ticketing API](https://developer.zendesk.com/documentation/ticketing/using-the-zendesk-api/searching-with-the-zendesk-api/)
+    ///
+    pub async fn search_tickets(&self, query: &str) -> Result<Vec<Ticket>, io::Error> {
+        //
+        let query = url::form_urlencoded::byte_serialize(query.as_bytes()).collect::<String>();
+        let mut result = Vec::new();
+        let mut resp = self
+            .do_zapi_request::<SearchTicketsResp>(reqwest::Method::GET, format!("search.json?query={query}"))
+            .await?;
+        result.append(&mut resp.results);
+        while let Some(next_page) = resp.next_page {
+            println!("Got count: {} and next_page: {:?}", resp.count, next_page);
+            resp = self
+                .do_zapi_request_to_url::<SearchTicketsResp>(reqwest::Method::GET, next_page)
+                .await?;
+            result.append(&mut resp.results);
+        }
+        assert_eq!(result.len(), resp.count as usize);
+        Ok(result)
     }
 }

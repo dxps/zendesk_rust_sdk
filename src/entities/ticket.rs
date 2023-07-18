@@ -44,3 +44,11 @@ pub struct GetTicketsCountRespBody {
     pub value: i64,
     pub refreshed_at: DateTime<Utc>,
 }
+
+#[derive(Debug, Deserialize)]
+pub struct SearchTicketsResp {
+    pub results: Vec<Ticket>,
+    pub next_page: Option<String>,
+    pub previous_page: Option<String>,
+    pub count: i32,
+}
