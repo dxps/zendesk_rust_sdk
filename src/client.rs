@@ -111,8 +111,19 @@ impl Client {
     }
 
     ///
-    /// Search tickets using your own query. Note that this will be URL encoded before being sent to Zendesk API.
-    /// References:
+    /// Search tickets using your own query.<br/>
+    /// Note that this will be URL encoded before being sent to Zendesk API.
+    ///
+    ///
+    /// <h4>Example</h4>
+    ///
+    /// ```rust
+    /// let query = format!("type:ticket status:open created>2022-01-01");
+    /// let result = client.search_tickets(&query).await;
+    /// ```
+    ///
+    /// <h4>References</h4>
+    ///
     /// - [Searching by date and time](https://support.zendesk.com/hc/en-us/articles/4408886879258#topic_ghr_wsc_3v)
     /// - [Searching with the Zendesk Ticketing API](https://developer.zendesk.com/documentation/ticketing/using-the-zendesk-api/searching-with-the-zendesk-api/)
     ///
