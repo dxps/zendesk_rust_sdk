@@ -49,10 +49,12 @@ impl Client {
         T: DeserializeOwned,
     {
         let url = format!("{}/{}", &self.base_url, resource);
-        self.do_zapi_request_to_url(method, url).await
+        self.do_request_with_authz_basic_zapi_token(method, url).await
     }
 
-    pub(crate) async fn do_zapi_request_to_url<T>(
+    /// Execute the request to the provided `url` using the provided `method`.<br/>
+    /// It includes the `Authorization` header with the value of `Basic {zendesk-api-token}`.
+    pub(crate) async fn do_request_with_authz_basic_zapi_token<T>(
         &self,
         method: Method,
         url: String,
@@ -138,7 +140,7 @@ impl Client {
         while let Some(next_page) = resp.next_page {
             println!("Got count: {} and next_page: {:?}", resp.count, next_page);
             resp = self
-                .do_zapi_request_to_url::<SearchTicketsResp>(reqwest::Method::GET, next_page)
+                .do_request_with_authz_basic_zapi_token::<SearchTicketsResp>(reqwest::Method::GET, next_page)
                 .await?;
             result.append(&mut resp.results);
         }
