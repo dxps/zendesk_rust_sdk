@@ -4,7 +4,7 @@ use zendesk_rsdk::ex_init;
 async fn main() {
     let client = ex_init();
 
-    let query = format!("type:ticket status:open created>2022-01-01");
+    let query = format!("type:ticket status:open created>2017-01-01");
     let result = client.search_tickets(&query).await;
 
     println!("--------------------------------------------------------------------------------\n");
@@ -16,7 +16,8 @@ async fn main() {
                 println!("{:?}\n", item)
             }
         }
-        println!("Search Tickets Summary\n----------------------");
+        println!("Search Tickets Summary");
+        println!("----------------------");
         println!("\t- items: {}", result.len());
         println!("\t- query: '{query}'");
     } else {
